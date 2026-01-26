@@ -102,19 +102,19 @@ export function DataPreview({
   };
 
   return (
-    <div className={cn('rounded-lg border border-neutral-200 bg-white', className)}>
+    <div className={cn('rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900', className)}>
       {/* Stats bar */}
-      <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
         <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-600">
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             <span className="font-medium">{formatNumber(data.rowCount)}</span> rows
           </span>
-          <span className="text-sm text-neutral-600">
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             <span className="font-medium">{data.columnCount}</span> columns
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-neutral-600">Rows per page:</span>
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">Rows per page:</span>
           <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
             <SelectTrigger className="w-20">
               <SelectValue />
@@ -133,20 +133,20 @@ export function DataPreview({
       {/* Table */}
       <div className="overflow-auto" style={{ maxHeight }}>
         <table className="w-full border-collapse text-sm">
-          <thead className="sticky top-0 bg-neutral-50">
+          <thead className="sticky top-0 bg-neutral-50 dark:bg-neutral-800">
             <tr>
-              <th className="w-12 border-b border-neutral-200 px-3 py-2 text-left font-medium text-neutral-500">
+              <th className="w-12 border-b border-neutral-200 dark:border-neutral-700 px-3 py-2 text-left font-medium text-neutral-500 dark:text-neutral-400">
                 #
               </th>
               {headers.map((header) => (
                 <th
                   key={header}
                   onClick={() => handleSort(header)}
-                  className="cursor-pointer border-b border-neutral-200 px-3 py-2 text-left font-medium text-neutral-700 hover:bg-neutral-100"
+                  className="cursor-pointer border-b border-neutral-200 dark:border-neutral-700 px-3 py-2 text-left font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
                 >
                   <div className="flex items-center gap-1">
                     <span className="truncate">{header}</span>
-                    <span className="text-xs text-neutral-400">
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
                       ({columnTypes[header]})
                     </span>
                     {sortColumn === header && (
@@ -163,15 +163,15 @@ export function DataPreview({
             {currentRows.map((row, rowIndex) => (
               <tr
                 key={startIndex + rowIndex}
-                className="hover:bg-neutral-50"
+                className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
               >
-                <td className="border-b border-neutral-100 px-3 py-2 text-neutral-400">
+                <td className="border-b border-neutral-100 dark:border-neutral-800 px-3 py-2 text-neutral-400 dark:text-neutral-500">
                   {startIndex + rowIndex + 1}
                 </td>
                 {headers.map((header) => (
                   <td
                     key={header}
-                    className="max-w-xs truncate border-b border-neutral-100 px-3 py-2 text-neutral-700"
+                    className="max-w-xs truncate border-b border-neutral-100 dark:border-neutral-800 px-3 py-2 text-neutral-700 dark:text-neutral-300"
                     title={formatCellValue(row[header])}
                   >
                     {formatCellValue(row[header])}
@@ -184,8 +184,8 @@ export function DataPreview({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between border-t border-neutral-200 px-4 py-3">
-        <span className="text-sm text-neutral-600">
+      <div className="flex items-center justify-between border-t border-neutral-200 dark:border-neutral-800 px-4 py-3">
+        <span className="text-sm text-neutral-600 dark:text-neutral-400">
           Showing {formatNumber(startIndex + 1)} to {formatNumber(endIndex)} of{' '}
           {formatNumber(sortedRows.length)} rows
         </span>
@@ -206,7 +206,7 @@ export function DataPreview({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="mx-2 text-sm text-neutral-600">
+          <span className="mx-2 text-sm text-neutral-600 dark:text-neutral-400">
             Page {currentPage} of {totalPages}
           </span>
           <Button

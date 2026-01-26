@@ -172,17 +172,17 @@ export default function VisualizePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-50">
+    <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
       <Header />
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900">
+              <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
                 Create Visualization
               </h1>
-              <p className="mt-1 text-neutral-600">
+              <p className="mt-1 text-neutral-600 dark:text-neutral-400">
                 Upload your data file and create interactive charts
               </p>
             </div>
@@ -257,7 +257,7 @@ export default function VisualizePage() {
             </TabsContent>
 
             <TabsContent value="dashboard" id="dashboard-content">
-              <div ref={dashboardRef} className="dashboard-export-area bg-white p-4">
+              <div ref={dashboardRef} className="dashboard-export-area bg-white dark:bg-neutral-900 p-4 rounded-lg">
                 <DashboardGrid
                   charts={charts}
                   layout={layout}
@@ -285,7 +285,7 @@ export default function VisualizePage() {
           
           <div className="space-y-4 py-4">
             {saveError && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              <div className="rounded-md bg-red-50 dark:bg-red-950 p-3 text-sm text-red-600 dark:text-red-400">
                 {saveError}
               </div>
             )}

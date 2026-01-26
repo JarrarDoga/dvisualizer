@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { BarChart3, Menu, X, LogOut, User, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,12 +33,12 @@ export function Header({ user, onSignOut }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 no-print">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-neutral-950/60 no-print">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <BarChart3 className="h-6 w-6 text-blue-600" />
-          <span className="text-lg font-semibold text-neutral-900">
+          <span className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
             DVisualizer
           </span>
         </Link>
@@ -49,10 +50,10 @@ export function Header({ user, onSignOut }: HeaderProps) {
               key={link.href}
               href={link.href}
               className={cn(
-                'text-sm font-medium transition-colors hover:text-neutral-900',
+                'text-sm font-medium transition-colors hover:text-neutral-900 dark:hover:text-neutral-100',
                 pathname === link.href
-                  ? 'text-neutral-900'
-                  : 'text-neutral-500'
+                  ? 'text-neutral-900 dark:text-neutral-100'
+                  : 'text-neutral-500 dark:text-neutral-400'
               )}
             >
               {link.label}
@@ -61,7 +62,9 @@ export function Header({ user, onSignOut }: HeaderProps) {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -82,7 +85,7 @@ export function Header({ user, onSignOut }: HeaderProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={onSignOut}
-                  className="text-red-600 focus:text-red-600"
+                  className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
@@ -120,7 +123,7 @@ export function Header({ user, onSignOut }: HeaderProps) {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="border-t border-neutral-200 bg-white md:hidden">
+        <div className="border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 md:hidden">
           <nav className="flex flex-col gap-2 p-4">
             {navLinks.map((link) => (
               <Link
@@ -130,8 +133,8 @@ export function Header({ user, onSignOut }: HeaderProps) {
                 className={cn(
                   'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   pathname === link.href
-                    ? 'bg-neutral-100 text-neutral-900'
-                    : 'text-neutral-600 hover:bg-neutral-50'
+                    ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900'
                 )}
               >
                 {link.label}
@@ -142,14 +145,14 @@ export function Header({ user, onSignOut }: HeaderProps) {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-50"
+                  className="rounded-md px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-md bg-neutral-900 px-3 py-2 text-center text-sm font-medium text-white hover:bg-neutral-800"
+                  className="rounded-md bg-neutral-900 dark:bg-neutral-100 px-3 py-2 text-center text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200"
                 >
                   Get Started
                 </Link>
