@@ -156,7 +156,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4">
       <React.Suspense
         fallback={
           <div className="flex items-center justify-center">

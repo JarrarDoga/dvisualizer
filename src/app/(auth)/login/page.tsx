@@ -19,8 +19,17 @@ function LoginForm() {
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [rememberMe, setRememberMe] = React.useState(true);
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+
+  // Load saved email on mount
+  React.useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +46,12 @@ function LoginForm() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
+        // Save or remove email based on remember me
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
         router.push(callbackUrl);
         router.refresh();
       }
@@ -52,28 +67,28 @@ function LoginForm() {
       <CardHeader className="text-center">
         <Link href="/" className="mb-4 flex items-center justify-center gap-2">
           <BarChart3 className="h-8 w-8 text-blue-600" />
-          <span className="text-xl font-bold text-neutral-900">DVisualizer</span>
+          <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">DVisualizer</span>
         </Link>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
         <CardDescription>Sign in to access your dashboards</CardDescription>
       </CardHeader>
       <CardContent>
         {wasReset && (
-          <div className="mb-4 flex items-center gap-2 rounded-md bg-green-50 p-3 text-sm text-green-600">
+          <div className="mb-4 flex items-center gap-2 rounded-md bg-green-50 dark:bg-green-950 p-3 text-sm text-green-600 dark:text-green-400">
             <CheckCircle className="h-4 w-4" />
             Password reset successfully. Please sign in.
           </div>
         )}
         
         {hasPending && (
-          <div className="mb-4 rounded-md bg-blue-50 p-3 text-sm text-blue-600">
+          <div className="mb-4 rounded-md bg-blue-50 dark:bg-blue-950 p-3 text-sm text-blue-600 dark:text-blue-400">
             Sign in to save your dashboard.
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-md bg-red-50 dark:bg-red-950 p-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -96,7 +111,7 @@ function LoginForm() {
               <Label htmlFor="password">Password</Label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Forgot password?
               </Link>
@@ -113,15 +128,28 @@ function LoginForm() {
             />
           </div>
 
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800"
+            />
+            <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+              Remember my email
+            </Label>
+          </div>
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign In
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-neutral-600">
+        <div className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-blue-600 hover:underline">
+          <Link href="/register" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
             Sign up
           </Link>
         </div>
@@ -132,7 +160,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4">
       <React.Suspense
         fallback={
           <div className="flex items-center justify-center">

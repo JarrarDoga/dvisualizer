@@ -143,7 +143,7 @@ export default function DashboardViewPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen flex-col bg-neutral-50">
+      <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
         <Header user={session?.user} onSignOut={handleSignOut} />
         <main className="flex flex-1 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
@@ -154,7 +154,7 @@ export default function DashboardViewPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col bg-neutral-50">
+      <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
         <Header user={session?.user} onSignOut={handleSignOut} />
         <main className="flex flex-1 items-center justify-center">
           <div className="text-center">
@@ -174,7 +174,7 @@ export default function DashboardViewPage() {
   if (!dashboard) return null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-50">
+    <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
       <Header user={session?.user} onSignOut={handleSignOut} />
 
       <DashboardHeader

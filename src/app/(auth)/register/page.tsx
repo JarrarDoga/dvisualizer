@@ -58,12 +58,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="mb-4 flex items-center justify-center gap-2">
             <BarChart3 className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-neutral-900">DVisualizer</span>
+            <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">DVisualizer</span>
           </Link>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>Get started with your free account</CardDescription>
@@ -71,7 +71,7 @@ export default function RegisterPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              <div className="rounded-md bg-red-50 dark:bg-red-950 p-3 text-sm text-red-600 dark:text-red-400">
                 {error}
               </div>
             )}
@@ -135,9 +135,9 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-neutral-600">
+          <div className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:underline">
+            <Link href="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
               Sign in
             </Link>
           </div>

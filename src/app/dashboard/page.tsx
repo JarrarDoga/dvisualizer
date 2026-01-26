@@ -74,7 +74,7 @@ export default function DashboardListPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex min-h-screen flex-col bg-neutral-50">
+      <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
         <Header user={session?.user} onSignOut={handleSignOut} />
         <main className="flex flex-1 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
@@ -84,17 +84,17 @@ export default function DashboardListPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-50">
+    <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
       <Header user={session?.user} onSignOut={handleSignOut} />
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900">
+              <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
                 My Dashboards
               </h1>
-              <p className="mt-1 text-neutral-600">
+              <p className="mt-1 text-neutral-600 dark:text-neutral-400">
                 Manage and view your saved dashboards
               </p>
             </div>
@@ -108,7 +108,7 @@ export default function DashboardListPage() {
           </div>
 
           {error && (
-            <div className="mb-6 rounded-md bg-red-50 p-4 text-sm text-red-600">
+            <div className="mb-6 rounded-md bg-red-50 dark:bg-red-950 p-4 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -116,13 +116,13 @@ export default function DashboardListPage() {
           {dashboards.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <div className="mb-4 rounded-full bg-neutral-100 p-4">
+                <div className="mb-4 rounded-full bg-neutral-100 dark:bg-neutral-800 p-4">
                   <Plus className="h-8 w-8 text-neutral-400" />
                 </div>
-                <h3 className="text-lg font-medium text-neutral-900">
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
                   No dashboards yet
                 </h3>
-                <p className="mt-1 text-neutral-600">
+                <p className="mt-1 text-neutral-600 dark:text-neutral-400">
                   Create your first dashboard by uploading a data file.
                 </p>
                 <Link href="/visualize" className="mt-4">
@@ -135,7 +135,7 @@ export default function DashboardListPage() {
               {dashboards.map((dashboard) => (
                 <Card
                   key={dashboard.id}
-                  className="transition-shadow hover:shadow-md"
+                  className="transition-shadow hover:shadow-md dark:hover:shadow-neutral-900/50"
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
@@ -159,7 +159,7 @@ export default function DashboardListPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-4 flex items-center gap-4 text-sm text-neutral-500">
+                    <div className="mb-4 flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400">
                       <span>{dashboard.chartCount} charts</span>
                       <span>Updated {formatDate(dashboard.updatedAt)}</span>
                     </div>
@@ -174,7 +174,7 @@ export default function DashboardListPage() {
                         variant="outline"
                         size="icon"
                         onClick={() => handleDelete(dashboard.id)}
-                        className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                        className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
