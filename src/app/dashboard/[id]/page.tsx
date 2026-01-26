@@ -158,7 +158,7 @@ export default function DashboardViewPage() {
         <Header user={session?.user} onSignOut={handleSignOut} />
         <main className="flex flex-1 items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-neutral-900">{error}</h1>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{error}</h1>
             <button
               onClick={() => router.push('/dashboard')}
               className="mt-4 text-blue-600 hover:underline"
@@ -188,7 +188,7 @@ export default function DashboardViewPage() {
       />
 
       <main className="flex-1 p-6">
-        <div ref={dashboardRef} className="mx-auto max-w-7xl bg-white p-4 print:p-0">
+        <div ref={dashboardRef} className="mx-auto max-w-7xl rounded-lg bg-white dark:bg-neutral-900 p-4 print:p-0">
           {/* Print header */}
           <div className="hidden print:block print:mb-6">
             <h1 className="text-2xl font-bold">{dashboard.name}</h1>

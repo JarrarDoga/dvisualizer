@@ -65,20 +65,20 @@ export function ChartTypeSelector({
             key={type}
             onClick={() => onChange(type)}
             className={cn(
-              'flex cursor-pointer flex-col items-center justify-center p-4 transition-all hover:bg-neutral-50',
-              isSelected && 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+              'flex cursor-pointer flex-col items-center justify-center p-4 transition-all hover:bg-neutral-50 dark:hover:bg-neutral-800',
+              isSelected && 'border-blue-500 bg-blue-50 dark:bg-blue-950 ring-1 ring-blue-500'
             )}
           >
             <Icon
               className={cn(
                 'mb-2 h-8 w-8',
-                isSelected ? 'text-blue-600' : 'text-neutral-500'
+                isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-500 dark:text-neutral-400'
               )}
             />
             <span
               className={cn(
                 'text-xs font-medium',
-                isSelected ? 'text-blue-700' : 'text-neutral-600'
+                isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-neutral-600 dark:text-neutral-400'
               )}
             >
               {CHART_TYPE_LABELS[type].replace(' Chart', '')}
@@ -108,26 +108,26 @@ export function ChartTypeList({
             className={cn(
               'flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all',
               isSelected
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800'
             )}
           >
             <Icon
               className={cn(
                 'h-5 w-5',
-                isSelected ? 'text-blue-600' : 'text-neutral-500'
+                isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-500 dark:text-neutral-400'
               )}
             />
             <div>
               <p
                 className={cn(
                   'text-sm font-medium',
-                  isSelected ? 'text-blue-700' : 'text-neutral-700'
+                  isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-neutral-700 dark:text-neutral-300'
                 )}
               >
                 {CHART_TYPE_LABELS[type]}
               </p>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 {CHART_TYPE_DESCRIPTIONS[type]}
               </p>
             </div>

@@ -64,15 +64,15 @@ export function DashboardGrid({
     return (
       <div
         className={cn(
-          'flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50',
+          'flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900',
           className
         )}
       >
         <div className="text-center">
-          <p className="text-lg font-medium text-neutral-600">
+          <p className="text-lg font-medium text-neutral-600 dark:text-neutral-400">
             No charts added yet
           </p>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-500">
             Configure and add charts from the builder above
           </p>
         </div>

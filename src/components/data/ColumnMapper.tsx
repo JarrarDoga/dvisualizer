@@ -195,7 +195,7 @@ export function ColumnMapper({
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-neutral-500">{fieldDescriptions[field]}</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">{fieldDescriptions[field]}</p>
       </div>
     );
   };

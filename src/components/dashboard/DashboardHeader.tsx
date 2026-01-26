@@ -60,7 +60,7 @@ export function DashboardHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 border-b border-neutral-200 bg-white px-6 py-4 no-print sm:flex-row sm:items-center sm:justify-between',
+        'flex flex-col gap-4 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-4 no-print sm:flex-row sm:items-center sm:justify-between',
         className
       )}
     >
@@ -86,7 +86,7 @@ export function DashboardHeader({
           ) : (
             <h1
               onClick={handleStartEdit}
-              className="cursor-pointer text-xl font-semibold text-neutral-900 hover:text-neutral-600"
+              className="cursor-pointer text-xl font-semibold text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400"
               title="Click to edit"
             >
               {name}
@@ -94,7 +94,7 @@ export function DashboardHeader({
           )}
 
           {hasUnsavedChanges && (
-            <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+            <span className="rounded bg-amber-100 dark:bg-amber-900 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
               Unsaved
             </span>
           )}

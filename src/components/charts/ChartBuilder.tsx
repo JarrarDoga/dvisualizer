@@ -104,24 +104,24 @@ export function ChartBuilder({ data, onAddChart, className }: ChartBuilderProps)
               </div>
 
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={showLegend}
                     onChange={(e) => setShowLegend(e.target.checked)}
-                    className="h-4 w-4 rounded border-neutral-300"
+                    className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800"
                   />
-                  <span className="text-sm">Show Legend</span>
+                  <span className="text-sm text-neutral-700 dark:text-neutral-300">Show Legend</span>
                 </label>
 
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={showGrid}
                     onChange={(e) => setShowGrid(e.target.checked)}
-                    className="h-4 w-4 rounded border-neutral-300"
+                    className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-600 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800"
                   />
-                  <span className="text-sm">Show Grid</span>
+                  <span className="text-sm text-neutral-700 dark:text-neutral-300">Show Grid</span>
                 </label>
               </div>
             </TabsContent>
@@ -157,7 +157,7 @@ export function ChartBuilder({ data, onAddChart, className }: ChartBuilderProps)
                 showGrid={showGrid}
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-center text-neutral-500">
+              <div className="flex h-full items-center justify-center text-center text-neutral-500 dark:text-neutral-400">
                 <div>
                   <p className="mb-2 text-lg font-medium">Configure your chart</p>
                   <p className="text-sm">
