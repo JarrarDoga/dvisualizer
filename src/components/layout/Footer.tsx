@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
-import { BarChart3, Github } from 'lucide-react';
+import { BarChart3, Github, Mail } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -19,8 +19,12 @@ export function Footer() {
             <Link href="/dashboard" className="hover:text-neutral-900 dark:hover:text-neutral-100">
               Dashboards
             </Link>
+            <Link href="/contact" className="flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100">
+              <Mail className="h-4 w-4" />
+              Contact
+            </Link>
             <a
-              href="https://github.com"
+              href="https://github.com/JarrarDoga"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
