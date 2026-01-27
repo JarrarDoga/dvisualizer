@@ -1,3 +1,5 @@
+import type { AggregationType } from './data';
+
 export type ChartType =
   | 'bar'
   | 'line'
@@ -27,6 +29,7 @@ export interface ChartConfig {
   showTooltip?: boolean;
   stacked?: boolean;
   layout?: 'horizontal' | 'vertical';
+  aggregation?: AggregationType;
 }
 
 export interface AxisConfig {

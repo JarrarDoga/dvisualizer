@@ -42,6 +42,7 @@ export function ChartBuilder({ data, onAddChart, className }: ChartBuilderProps)
       yAxis: mapping.yAxis ? { dataKey: mapping.yAxis } : undefined,
       dataKey: mapping.value,
       nameKey: mapping.category,
+      aggregation: mapping.aggregation,
     };
 
     onAddChart(config, data.rows);

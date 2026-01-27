@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { ChartType } from '@/types';
+import type { ChartType, AggregationType } from '@/types';
+import { AGGREGATION_LABELS, AGGREGATION_DESCRIPTIONS } from '@/types';
 import { detectColumnType } from '@/lib/utils';
 
 interface ColumnMapperProps {
@@ -28,6 +29,7 @@ export interface ColumnMapping {
   value?: string;
   series?: string[];
   label?: string;
+  aggregation?: AggregationType;
 }
 
 const NONE_VALUE = '__none__';
@@ -52,6 +54,7 @@ const fieldLabels: Record<string, string> = {
   value: 'Value',
   series: 'Series (Multiple Lines)',
   label: 'Label',
+  aggregation: 'Aggregation',
 };
 
 const fieldDescriptions: Record<string, string> = {
@@ -61,7 +64,21 @@ const fieldDescriptions: Record<string, string> = {
   value: 'Numeric values to visualize',
   series: 'Multiple data series to compare',
   label: 'Labels to display on chart elements',
+  aggregation: 'How to combine multiple values per category',
 };
+
+// Aggregation options - excluding 'none' from the type for display
+const AGGREGATION_OPTIONS: AggregationType[] = [
+  'none',
+  'sum',
+  'average',
+  'count',
+  'min',
+  'max',
+  'median',
+  'first',
+  'last',
+];
 
 export function ColumnMapper({
   headers,
@@ -71,6 +88,7 @@ export function ColumnMapper({
   className,
 }: ColumnMapperProps) {
   const [mapping, setMapping] = React.useState<ColumnMapping>({});
+  const [aggregation, setAggregation] = React.useState<AggregationType>('sum');
   const onMappingChangeRef = React.useRef(onMappingChange);
   const hasInitialized = React.useRef(false);
 
@@ -128,6 +146,9 @@ export function ColumnMapper({
       autoMapping.value = numericColumns[0] || headers[1] || headers[0];
     }
 
+    // Include current aggregation setting
+    autoMapping.aggregation = aggregation;
+
     setMapping(autoMapping);
     
     // Use setTimeout to break out of the render cycle
@@ -136,11 +157,18 @@ export function ColumnMapper({
     }, 0);
     
     hasInitialized.current = true;
-  }, [chartType, headers, numericColumns, categoricalColumns, requirements]);
+  }, [chartType, headers, numericColumns, categoricalColumns, requirements, aggregation]);
 
   const handleChange = (field: string, value: string) => {
     const actualValue = value === NONE_VALUE ? undefined : value;
     const newMapping = { ...mapping, [field]: actualValue };
+    setMapping(newMapping);
+    onMappingChangeRef.current(newMapping);
+  };
+
+  const handleAggregationChange = (value: AggregationType) => {
+    setAggregation(value);
+    const newMapping = { ...mapping, aggregation: value };
     setMapping(newMapping);
     onMappingChangeRef.current(newMapping);
   };
@@ -200,11 +228,51 @@ export function ColumnMapper({
     );
   };
 
+  const renderAggregationSelector = () => {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="aggregation" className="text-sm font-medium">
+            {fieldLabels.aggregation}
+          </Label>
+        </div>
+        <Select
+          value={aggregation}
+          onValueChange={(value) => handleAggregationChange(value as AggregationType)}
+        >
+          <SelectTrigger id="aggregation" className="w-full">
+            <SelectValue placeholder="Select aggregation" />
+          </SelectTrigger>
+          <SelectContent>
+            {AGGREGATION_OPTIONS.map((agg) => (
+              <SelectItem key={agg} value={agg}>
+                <div className="flex flex-col">
+                  <span>{AGGREGATION_LABELS[agg]}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+          {AGGREGATION_DESCRIPTIONS[aggregation]}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className={cn('space-y-4', className)}>
       <div className="grid gap-4 sm:grid-cols-2">
         {requirements.required.map((field) => renderField(field, true))}
         {requirements.optional.map((field) => renderField(field, false))}
+      </div>
+      
+      {/* Aggregation Selector */}
+      <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
+        <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+          Data Aggregation
+        </h4>
+        {renderAggregationSelector()}
       </div>
     </div>
   );
