@@ -1,38 +1,25 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Email configuration
-const emailConfig = {
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-};
-
-// Create transporter
-const transporter = nodemailer.createTransport(emailConfig);
+// Initialize Resend client
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 // Get app URL for links
 const getAppUrl = () => {
   return process.env.NEXTAUTH_URL || 'http://localhost:3000';
 };
 
-// Get "from" address
+// Get "from" address - use verified domain or Resend's test domain
 const getFromAddress = () => {
-  return process.env.SMTP_FROM || `DVisualizer <${process.env.SMTP_USER}>`;
+  return process.env.EMAIL_FROM || 'DVisualizer <onboarding@resend.dev>';
 };
 
 /**
  * Check if email is properly configured
  */
 export function isEmailConfigured(): boolean {
-  return Boolean(
-    process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASSWORD
-  );
+  return Boolean(process.env.RESEND_API_KEY);
 }
 
 /**
@@ -43,8 +30,8 @@ export async function sendPasswordResetEmail(
   token: string,
   userName?: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isEmailConfigured()) {
-    console.error('Email is not configured. Please set SMTP environment variables.');
+  if (!resend) {
+    console.error('Resend is not configured. Please set RESEND_API_KEY environment variable.');
     return { 
       success: false, 
       error: 'Email service is not configured' 
@@ -54,11 +41,12 @@ export async function sendPasswordResetEmail(
   const resetUrl = `${getAppUrl()}/reset-password?token=${token}`;
   const appName = 'DVisualizer';
 
-  const mailOptions = {
-    from: getFromAddress(),
-    to: email,
-    subject: `Reset your ${appName} password`,
-    text: `
+  try {
+    const { error } = await resend.emails.send({
+      from: getFromAddress(),
+      to: email,
+      subject: `Reset your ${appName} password`,
+      text: `
 Hello${userName ? ` ${userName}` : ''},
 
 You requested to reset your password for your ${appName} account.
@@ -72,8 +60,8 @@ If you didn't request this, you can safely ignore this email. Your password will
 
 Best regards,
 The ${appName} Team
-    `.trim(),
-    html: `
+      `.trim(),
+      html: `
 <!DOCTYPE html>
 <html>
 <head>
@@ -117,11 +105,17 @@ The ${appName} Team
   </div>
 </body>
 </html>
-    `.trim(),
-  };
+      `.trim(),
+    });
 
-  try {
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Error sending password reset email:', error);
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
+
     console.log(`Password reset email sent to ${email}`);
     return { success: true };
   } catch (error) {
@@ -130,22 +124,5 @@ The ${appName} Team
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to send email' 
     };
-  }
-}
-
-/**
- * Verify email configuration by sending a test email
- */
-export async function verifyEmailConfig(): Promise<boolean> {
-  if (!isEmailConfigured()) {
-    return false;
-  }
-
-  try {
-    await transporter.verify();
-    return true;
-  } catch (error) {
-    console.error('Email configuration verification failed:', error);
-    return false;
   }
 }
