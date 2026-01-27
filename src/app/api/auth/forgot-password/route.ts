@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { z } from 'zod';
 import prisma from '@/lib/db';
+import { sendPasswordResetEmail, isEmailConfigured } from '@/lib/email';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     // Always return success to prevent email enumeration
     if (!user) {
       return NextResponse.json({
-        message: 'If an account exists with this email, a reset link has been generated.',
+        message: 'If an account exists with this email, a reset link has been sent.',
       });
     }
 
@@ -55,17 +56,29 @@ export async function POST(request: Request) {
       },
     });
 
-    // In production, you would send an email here
-    // For now, we'll return the token in the response (only for development)
-    const resetUrl = `/reset-password?token=${token}`;
-
-    // Log the reset URL for development
-    console.log(`Password reset link for ${email}: ${resetUrl}`);
+    // Send password reset email
+    if (isEmailConfigured()) {
+      const result = await sendPasswordResetEmail(email, token, user.name || undefined);
+      
+      if (!result.success) {
+        console.error(`Failed to send password reset email to ${email}:`, result.error);
+        // Still return success to prevent email enumeration
+        // But log the error for debugging
+      }
+    } else {
+      // Email not configured - log for development
+      const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+      console.warn('⚠️  Email is not configured. Set SMTP environment variables to enable email sending.');
+      console.log(`📧 Password reset link for ${email}: ${resetUrl}`);
+    }
 
     return NextResponse.json({
-      message: 'If an account exists with this email, a reset link has been generated.',
-      // Remove this in production - only for development testing
-      ...(process.env.NODE_ENV === 'development' && { resetUrl }),
+      message: 'If an account exists with this email, a reset link has been sent.',
+      // Only include reset URL in development when email is not configured
+      ...(process.env.NODE_ENV === 'development' && !isEmailConfigured() && { 
+        resetUrl: `/reset-password?token=${token}`,
+        warning: 'Email not configured. Configure SMTP settings to send actual emails.'
+      }),
     });
   } catch (error) {
     console.error('Forgot password error:', error);
