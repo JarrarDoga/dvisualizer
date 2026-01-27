@@ -11,6 +11,7 @@ import { TreemapChartComponent } from './TreemapChartComponent';
 import { FunnelChartComponent } from './FunnelChartComponent';
 import type { ChartType } from '@/types';
 import type { ColumnMapping } from '@/components/data/ColumnMapper';
+import { aggregateData, aggregateXYData } from '@/lib/utils';
 
 interface ChartRendererProps {
   chartType: ChartType;
@@ -31,8 +32,30 @@ export function ChartRenderer({
   showGrid = true,
   colors,
 }: ChartRendererProps) {
+  // Apply aggregation based on chart type and mapping
+  const processedData = React.useMemo(() => {
+    const aggregationType = mapping.aggregation || 'none';
+    
+    // Charts that use category/value (pie, donut, treemap, funnel, radar)
+    const categoryCharts: ChartType[] = ['pie', 'donut', 'treemap', 'funnel', 'radar'];
+    
+    if (categoryCharts.includes(chartType)) {
+      if (mapping.category && mapping.value) {
+        return aggregateData(data, mapping.category, mapping.value, aggregationType);
+      }
+      return data;
+    }
+    
+    // Charts that use xAxis/yAxis (bar, line, area, scatter, composed)
+    if (mapping.xAxis && mapping.yAxis) {
+      return aggregateXYData(data, mapping.xAxis, mapping.yAxis, aggregationType);
+    }
+    
+    return data;
+  }, [data, mapping, chartType]);
+
   const commonProps = {
-    data,
+    data: processedData,
     title,
     showLegend,
     colors,

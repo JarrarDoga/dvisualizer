@@ -122,3 +122,125 @@ export function downloadFile(content: string | Blob, filename: string, type: str
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+// ============================================
+// Data Aggregation Utilities
+// ============================================
+
+import type { AggregationType } from '@/types';
+
+/**
+ * Apply an aggregation function to an array of numeric values
+ */
+export function applyAggregation(
+  values: number[],
+  aggregationType: AggregationType
+): number {
+  if (values.length === 0) return 0;
+
+  const validValues = values.filter((v) => !isNaN(v) && isFinite(v));
+  if (validValues.length === 0) return 0;
+
+  switch (aggregationType) {
+    case 'none':
+      // For 'none', return the first value (shouldn't typically be used)
+      return validValues[0];
+
+    case 'sum':
+      return validValues.reduce((acc, val) => acc + val, 0);
+
+    case 'average':
+      return validValues.reduce((acc, val) => acc + val, 0) / validValues.length;
+
+    case 'count':
+      return validValues.length;
+
+    case 'min':
+      return Math.min(...validValues);
+
+    case 'max':
+      return Math.max(...validValues);
+
+    case 'median':
+      const sorted = [...validValues].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+
+    case 'first':
+      return validValues[0];
+
+    case 'last':
+      return validValues[validValues.length - 1];
+
+    default:
+      return validValues[0];
+  }
+}
+
+/**
+ * Aggregate data by grouping column
+ * @param data - Array of data records
+ * @param groupByKey - Column to group by (e.g., category)
+ * @param valueKey - Column containing values to aggregate
+ * @param aggregationType - Type of aggregation to apply
+ * @returns Aggregated data grouped by the groupByKey
+ */
+export function aggregateData(
+  data: Record<string, unknown>[],
+  groupByKey: string,
+  valueKey: string,
+  aggregationType: AggregationType
+): Record<string, unknown>[] {
+  // If no aggregation needed, return original data
+  if (aggregationType === 'none') {
+    return data;
+  }
+
+  // Group data by the groupByKey
+  const groups = new Map<string, number[]>();
+  const groupOrder: string[] = []; // Preserve order of first occurrence
+
+  for (const row of data) {
+    const groupValue = String(row[groupByKey] ?? 'Unknown');
+    const numericValue = parseNumericValue(row[valueKey]);
+
+    if (!groups.has(groupValue)) {
+      groups.set(groupValue, []);
+      groupOrder.push(groupValue);
+    }
+
+    if (numericValue !== null) {
+      groups.get(groupValue)!.push(numericValue);
+    }
+  }
+
+  // Apply aggregation to each group
+  const aggregatedData: Record<string, unknown>[] = [];
+
+  for (const groupValue of groupOrder) {
+    const values = groups.get(groupValue)!;
+    const aggregatedValue = applyAggregation(values, aggregationType);
+
+    aggregatedData.push({
+      [groupByKey]: groupValue,
+      [valueKey]: aggregatedValue,
+    });
+  }
+
+  return aggregatedData;
+}
+
+/**
+ * Aggregate data for XY charts (bar, line, area)
+ * Groups by xAxis and aggregates yAxis values
+ */
+export function aggregateXYData(
+  data: Record<string, unknown>[],
+  xAxisKey: string,
+  yAxisKey: string,
+  aggregationType: AggregationType
+): Record<string, unknown>[] {
+  return aggregateData(data, xAxisKey, yAxisKey, aggregationType);
+}
