@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { X, Download, Printer, FileImage, FileText, Edit } from 'lucide-react';
-import { toPng, toJpeg } from 'html-to-image';
+import { Download, Printer, FileImage, Edit } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,6 +20,9 @@ import {
 import { ChartRenderer } from '@/components/charts/ChartRenderer';
 import type { ChartConfig } from '@/types';
 import type { ColumnMapping } from '@/components/data/ColumnMapper';
+
+// Helper to wait for chart to fully render (including labels)
+const waitForChartRender = () => new Promise(resolve => setTimeout(resolve, 500));
 
 interface ChartModalProps {
   isOpen: boolean;
@@ -57,14 +60,17 @@ export function ChartModal({
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for chart to fully render including all labels
+      await waitForChartRender();
       
-      const dataUrl = await toPng(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        cacheBust: true,
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
 
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `${sanitizedName}.png`;
       link.href = dataUrl;
@@ -84,15 +90,17 @@ export function ChartModal({
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for chart to fully render including all labels
+      await waitForChartRender();
       
-      const dataUrl = await toJpeg(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        quality: 0.95,
-        cacheBust: true,
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
 
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
       link.download = `${sanitizedName}.jpg`;
       link.href = dataUrl;
@@ -112,13 +120,17 @@ export function ChartModal({
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for chart to fully render including all labels
+      await waitForChartRender();
       
-      const dataUrl = await toPng(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        cacheBust: true,
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
+
+      const dataUrl = canvas.toDataURL('image/png');
 
       // Create a print window with the image for PDF
       const printWindow = window.open('', '_blank');
@@ -233,10 +245,14 @@ export function ChartModal({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto bg-neutral-100 dark:bg-neutral-800">
           <div 
             ref={chartRef} 
-            className="h-full min-h-[400px] bg-white dark:bg-neutral-900 rounded-lg p-4"
+            className="h-full min-h-[500px] bg-white rounded-lg p-6"
+            style={{ 
+              // Ensure consistent rendering for export
+              minWidth: '600px',
+            }}
           >
             <ChartRenderer
               chartType={config.type}

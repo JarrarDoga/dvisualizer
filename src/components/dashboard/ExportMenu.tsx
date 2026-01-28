@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { toPng, toJpeg } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { Download, Printer, FileImage, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,26 +36,21 @@ export function ExportMenu({ targetRef, fileName = 'dashboard' }: ExportMenuProp
 
     try {
       // Wait for any animations to settle
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dataUrl = await toPng(targetRef.current, {
+      const canvas = await html2canvas(targetRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        cacheBust: true,
-        style: {
-          // Ensure element is visible for capture
-          transform: 'none',
-        },
-        filter: (node) => {
-          // Filter out elements that shouldn't be in the export
-          if (node instanceof Element) {
-            if (node.classList?.contains('no-print')) return false;
-            if (node.tagName === 'BUTTON') return false;
-          }
-          return true;
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: (node) => {
+          if (node.classList?.contains('no-print')) return true;
+          if (node.tagName === 'BUTTON') return true;
+          return false;
         },
       });
 
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `${fileName}.png`;
       link.href = dataUrl;
@@ -79,22 +74,21 @@ export function ExportMenu({ targetRef, fileName = 'dashboard' }: ExportMenuProp
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dataUrl = await toJpeg(targetRef.current, {
+      const canvas = await html2canvas(targetRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        quality: 0.95,
-        cacheBust: true,
-        filter: (node) => {
-          if (node instanceof Element) {
-            if (node.classList?.contains('no-print')) return false;
-            if (node.tagName === 'BUTTON') return false;
-          }
-          return true;
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: (node) => {
+          if (node.classList?.contains('no-print')) return true;
+          if (node.tagName === 'BUTTON') return true;
+          return false;
         },
       });
 
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
       link.download = `${fileName}.jpg`;
       link.href = dataUrl;
@@ -152,14 +146,16 @@ export function ChartExportButton({ chartRef, chartName = 'chart' }: ChartExport
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dataUrl = await toPng(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        cacheBust: true,
+        scale: 2,
+        useCORS: true,
+        logging: false,
       });
 
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `${chartName}.png`;
       link.href = dataUrl;

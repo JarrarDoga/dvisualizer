@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { toPng, toJpeg } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { Download, Printer, FileImage, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,21 +30,21 @@ export function ExportControls({ targetRef, fileName = 'dashboard' }: ExportCont
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dataUrl = await toPng(targetRef.current, {
+      const canvas = await html2canvas(targetRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        cacheBust: true,
-        filter: (node) => {
-          if (node instanceof Element) {
-            if (node.classList?.contains('no-print')) return false;
-            if (node.tagName === 'BUTTON') return false;
-          }
-          return true;
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: (node) => {
+          if (node.classList?.contains('no-print')) return true;
+          if (node.tagName === 'BUTTON') return true;
+          return false;
         },
       });
 
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `${fileName}.png`;
       link.href = dataUrl;
@@ -65,22 +65,21 @@ export function ExportControls({ targetRef, fileName = 'dashboard' }: ExportCont
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dataUrl = await toJpeg(targetRef.current, {
+      const canvas = await html2canvas(targetRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        quality: 0.95,
-        cacheBust: true,
-        filter: (node) => {
-          if (node instanceof Element) {
-            if (node.classList?.contains('no-print')) return false;
-            if (node.tagName === 'BUTTON') return false;
-          }
-          return true;
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: (node) => {
+          if (node.classList?.contains('no-print')) return true;
+          if (node.tagName === 'BUTTON') return true;
+          return false;
         },
       });
 
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
       link.download = `${fileName}.jpg`;
       link.href = dataUrl;

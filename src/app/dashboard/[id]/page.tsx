@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { Header } from '@/components/layout/Header';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
@@ -110,21 +110,21 @@ export default function DashboardViewPage() {
     if (!dashboardRef.current) return;
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dataUrl = await toPng(dashboardRef.current, {
+      const canvas = await html2canvas(dashboardRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        cacheBust: true,
-        filter: (node) => {
-          if (node instanceof Element) {
-            if (node.classList?.contains('no-print')) return false;
-            if (node.tagName === 'BUTTON') return false;
-          }
-          return true;
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: (node) => {
+          if (node.classList?.contains('no-print')) return true;
+          if (node.tagName === 'BUTTON') return true;
+          return false;
         },
       });
 
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `${dashboard?.name || 'dashboard'}.png`;
       link.href = dataUrl;
