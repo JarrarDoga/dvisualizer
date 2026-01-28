@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { X, Download, Printer, FileImage, FileText, Edit } from 'lucide-react';
+import { Download, Printer, FileImage, Edit } from 'lucide-react';
 import { toPng, toJpeg } from 'html-to-image';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,9 @@ import {
 import { ChartRenderer } from '@/components/charts/ChartRenderer';
 import type { ChartConfig } from '@/types';
 import type { ColumnMapping } from '@/components/data/ColumnMapper';
+
+// Helper to wait for chart to fully render (including labels)
+const waitForChartRender = () => new Promise(resolve => setTimeout(resolve, 800));
 
 interface ChartModalProps {
   isOpen: boolean;
@@ -56,12 +59,19 @@ export function ChartModal({
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for chart to fully render including all labels
+      await waitForChartRender();
       
       const dataUrl = await toPng(chartRef.current, {
         backgroundColor: '#ffffff',
         pixelRatio: 3,
         cacheBust: true,
+        includeQueryParams: true,
+        skipFonts: false,
+        style: {
+          // Ensure all text is visible
+          opacity: '1',
+        },
       });
 
       const link = document.createElement('a');
@@ -83,13 +93,16 @@ export function ChartModal({
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for chart to fully render including all labels
+      await waitForChartRender();
       
       const dataUrl = await toJpeg(chartRef.current, {
         backgroundColor: '#ffffff',
         pixelRatio: 3,
         quality: 0.95,
         cacheBust: true,
+        includeQueryParams: true,
+        skipFonts: false,
       });
 
       const link = document.createElement('a');
@@ -111,12 +124,15 @@ export function ChartModal({
     setIsExporting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for chart to fully render including all labels
+      await waitForChartRender();
       
       const dataUrl = await toPng(chartRef.current, {
         backgroundColor: '#ffffff',
         pixelRatio: 3,
         cacheBust: true,
+        includeQueryParams: true,
+        skipFonts: false,
       });
 
       // Create a print window with the image for PDF
@@ -232,10 +248,14 @@ export function ChartModal({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto bg-neutral-100 dark:bg-neutral-800">
           <div 
             ref={chartRef} 
-            className="h-full min-h-[400px] bg-white dark:bg-neutral-900 rounded-lg p-4"
+            className="h-full min-h-[500px] bg-white rounded-lg p-6"
+            style={{ 
+              // Ensure consistent rendering for export
+              minWidth: '600px',
+            }}
           >
             <ChartRenderer
               chartType={config.type}

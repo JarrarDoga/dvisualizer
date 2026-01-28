@@ -48,10 +48,42 @@ export function PieChartComponent({
             cx="50%"
             cy="50%"
             innerRadius={innerRadius}
-            outerRadius="80%"
+            outerRadius="70%"
             paddingAngle={2}
-            label={showLabels ? ({ percent }) => `${((percent || 0) * 100).toFixed(0)}%` : false}
-            labelLine={showLabels}
+            label={showLabels ? ({ 
+              cx, 
+              cy, 
+              midAngle, 
+              innerRadius, 
+              outerRadius, 
+              percent 
+            }) => {
+              const RADIAN = Math.PI / 180;
+              const radius = Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 1.4;
+              const x = Number(cx) + radius * Math.cos(-midAngle * RADIAN);
+              const y = Number(cy) + radius * Math.sin(-midAngle * RADIAN);
+
+              return (
+                <text
+                  x={x}
+                  y={y}
+                  fill="#374151"
+                  textAnchor={x > Number(cx) ? 'start' : 'end'}
+                  dominantBaseline="central"
+                  style={{ 
+                    fontSize: '12px', 
+                    fontWeight: 500,
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                  }}
+                >
+                  {`${((percent || 0) * 100).toFixed(0)}%`}
+                </text>
+              );
+            } : false}
+            labelLine={showLabels ? {
+              stroke: '#9ca3af',
+              strokeWidth: 1,
+            } : false}
           >
             {data.map((_, index) => (
               <Cell
