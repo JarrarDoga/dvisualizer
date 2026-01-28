@@ -22,6 +22,8 @@ interface ColumnMapperProps {
   className?: string;
 }
 
+export type ScatterColorMode = 'single' | 'rainbow';
+
 export interface ColumnMapping {
   xAxis?: string;
   yAxis?: string;
@@ -31,6 +33,8 @@ export interface ColumnMapping {
   label?: string;
   aggregation?: AggregationType;
   showTrendLine?: boolean;
+  scatterColorMode?: ScatterColorMode;
+  scatterPointColor?: string;
 }
 
 const NONE_VALUE = '__none__';
@@ -81,6 +85,20 @@ const AGGREGATION_OPTIONS: AggregationType[] = [
   'last',
 ];
 
+// Color options for scatter plots
+const SCATTER_COLOR_OPTIONS = [
+  { value: '#3b82f6', label: 'Blue' },
+  { value: '#10b981', label: 'Green' },
+  { value: '#f59e0b', label: 'Amber' },
+  { value: '#ef4444', label: 'Red' },
+  { value: '#8b5cf6', label: 'Violet' },
+  { value: '#ec4899', label: 'Pink' },
+  { value: '#06b6d4', label: 'Cyan' },
+  { value: '#84cc16', label: 'Lime' },
+  { value: '#f97316', label: 'Orange' },
+  { value: '#6366f1', label: 'Indigo' },
+] as const;
+
 export function ColumnMapper({
   headers,
   rows,
@@ -91,6 +109,8 @@ export function ColumnMapper({
   const [mapping, setMapping] = React.useState<ColumnMapping>({});
   const [aggregation, setAggregation] = React.useState<AggregationType>('sum');
   const [showTrendLine, setShowTrendLine] = React.useState(false);
+  const [scatterColorMode, setScatterColorMode] = React.useState<ScatterColorMode>('single');
+  const [scatterPointColor, setScatterPointColor] = React.useState('#3b82f6');
   const onMappingChangeRef = React.useRef(onMappingChange);
   const hasInitialized = React.useRef(false);
 
@@ -166,9 +186,11 @@ export function ColumnMapper({
     // Include current aggregation setting
     autoMapping.aggregation = aggregation;
     
-    // Include trend line setting for scatter charts
+    // Include scatter-specific settings
     if (chartType === 'scatter') {
       autoMapping.showTrendLine = showTrendLine;
+      autoMapping.scatterColorMode = scatterColorMode;
+      autoMapping.scatterPointColor = scatterPointColor;
     }
 
     setMapping(autoMapping);
@@ -179,7 +201,7 @@ export function ColumnMapper({
     }, 0);
     
     hasInitialized.current = true;
-  }, [chartType, headers, numericColumns, categoricalColumns, requirements, aggregation, showTrendLine]);
+  }, [chartType, headers, numericColumns, categoricalColumns, requirements, aggregation, showTrendLine, scatterColorMode, scatterPointColor]);
 
   const handleChange = (field: string, value: string) => {
     const actualValue = value === NONE_VALUE ? undefined : value;
@@ -289,6 +311,20 @@ export function ColumnMapper({
     );
   };
 
+  const handleColorModeChange = (mode: ScatterColorMode) => {
+    setScatterColorMode(mode);
+    const newMapping = { ...mapping, scatterColorMode: mode };
+    setMapping(newMapping);
+    onMappingChangeRef.current(newMapping);
+  };
+
+  const handlePointColorChange = (color: string) => {
+    setScatterPointColor(color);
+    const newMapping = { ...mapping, scatterPointColor: color };
+    setMapping(newMapping);
+    onMappingChangeRef.current(newMapping);
+  };
+
   const renderScatterOptions = () => {
     if (chartType !== 'scatter') return null;
 
@@ -297,33 +333,91 @@ export function ColumnMapper({
         <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
           Scatter Plot Options
         </h4>
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="trendLine" className="text-sm font-medium">
-              Show Trend Line
-            </Label>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Display a line of best fit through the data points
-            </p>
+        <div className="space-y-4">
+          {/* Color Mode */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Point Colors</Label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleColorModeChange('single')}
+                className={cn(
+                  'flex-1 px-3 py-2 text-sm rounded-md border transition-colors',
+                  scatterColorMode === 'single'
+                    ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                )}
+              >
+                Single Color
+              </button>
+              <button
+                type="button"
+                onClick={() => handleColorModeChange('rainbow')}
+                className={cn(
+                  'flex-1 px-3 py-2 text-sm rounded-md border transition-colors',
+                  scatterColorMode === 'rainbow'
+                    ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                )}
+              >
+                Rainbow
+              </button>
+            </div>
           </div>
-          <button
-            id="trendLine"
-            type="button"
-            role="switch"
-            aria-checked={showTrendLine}
-            onClick={() => handleTrendLineToggle(!showTrendLine)}
-            className={cn(
-              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-              showTrendLine ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
-            )}
-          >
-            <span
+
+          {/* Color Picker (only for single color mode) */}
+          {scatterColorMode === 'single' && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Select Color</Label>
+              <div className="flex flex-wrap gap-2">
+                {SCATTER_COLOR_OPTIONS.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => handlePointColorChange(color.value)}
+                    className={cn(
+                      'w-8 h-8 rounded-full border-2 transition-all',
+                      scatterPointColor === color.value
+                        ? 'border-neutral-900 dark:border-white scale-110'
+                        : 'border-transparent hover:scale-105'
+                    )}
+                    style={{ backgroundColor: color.value }}
+                    title={color.label}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Trend Line Toggle */}
+          <div className="flex items-center justify-between pt-2">
+            <div>
+              <Label htmlFor="trendLine" className="text-sm font-medium">
+                Show Trend Line
+              </Label>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Display a line of best fit
+              </p>
+            </div>
+            <button
+              id="trendLine"
+              type="button"
+              role="switch"
+              aria-checked={showTrendLine}
+              onClick={() => handleTrendLineToggle(!showTrendLine)}
               className={cn(
-                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                showTrendLine ? 'translate-x-5' : 'translate-x-0'
+                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                showTrendLine ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               )}
-            />
-          </button>
+            >
+              <span
+                className={cn(
+                  'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                  showTrendLine ? 'translate-x-5' : 'translate-x-0'
+                )}
+              />
+            </button>
+          </div>
         </div>
       </div>
     );

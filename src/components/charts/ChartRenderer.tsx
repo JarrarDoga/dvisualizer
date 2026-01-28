@@ -119,6 +119,8 @@ export function ChartRenderer({
           categoryKey={mapping.category}
           showGrid={showGrid}
           showTrendLine={mapping.showTrendLine}
+          colorMode={mapping.scatterColorMode}
+          pointColor={mapping.scatterPointColor}
         />
       );
 

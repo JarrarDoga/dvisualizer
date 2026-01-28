@@ -12,6 +12,8 @@ export type ChartType =
   | 'funnel'
   | 'composed';
 
+export type ScatterColorMode = 'single' | 'rainbow';
+
 export interface ChartConfig {
   id: string;
   type: ChartType;
@@ -31,6 +33,8 @@ export interface ChartConfig {
   layout?: 'horizontal' | 'vertical';
   aggregation?: AggregationType;
   showTrendLine?: boolean;
+  scatterColorMode?: ScatterColorMode;
+  scatterPointColor?: string;
 }
 
 export interface AxisConfig {
