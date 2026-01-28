@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { Save, Loader2 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -78,6 +78,11 @@ export default function VisualizePage() {
 
   const handleLayoutChange = (newLayout: LayoutItem[]) => {
     setLayout(newLayout);
+  };
+
+  const handleEditChart = (chartId: string) => {
+    // Switch to build tab to edit the chart
+    setActiveTab('build');
   };
 
   const handleSaveClick = () => {
@@ -171,9 +176,13 @@ export default function VisualizePage() {
     }
   };
 
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' });
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50 dark:bg-neutral-950">
-      <Header />
+      <Header user={session?.user} onSignOut={handleSignOut} />
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -263,6 +272,7 @@ export default function VisualizePage() {
                   layout={layout}
                   onLayoutChange={handleLayoutChange}
                   onRemoveChart={handleRemoveChart}
+                  onEditChart={handleEditChart}
                   editable={true}
                 />
               </div>

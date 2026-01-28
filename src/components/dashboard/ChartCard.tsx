@@ -1,18 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { X, GripVertical, Download, Printer, FileImage } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { X, GripVertical, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { ChartRenderer } from '@/components/charts/ChartRenderer';
+import { ChartModal } from './ChartModal';
 import type { ChartConfig } from '@/types';
 import type { ColumnMapping } from '@/components/data/ColumnMapper';
 
@@ -20,6 +14,7 @@ interface ChartCardProps {
   config: ChartConfig;
   data: Record<string, unknown>[];
   onRemove?: () => void;
+  onEdit?: () => void;
   isDragging?: boolean;
   className?: string;
   showControls?: boolean;
@@ -29,12 +24,12 @@ export function ChartCard({
   config,
   data,
   onRemove,
+  onEdit,
   isDragging = false,
   className,
   showControls = true,
 }: ChartCardProps) {
-  const chartRef = React.useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   // Convert config to mapping format
   const mapping: ColumnMapping = React.useMemo(() => ({
@@ -42,163 +37,98 @@ export function ChartCard({
     yAxis: config.yAxis?.dataKey,
     category: config.nameKey,
     value: config.dataKey,
+    aggregation: config.aggregation,
   }), [config]);
 
-  const chartName = config.title || 'chart';
-
-  const handleExportPNG = async () => {
-    if (!chartRef.current) return;
-
-    setIsExporting(true);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      const dataUrl = await toPng(chartRef.current, {
-        backgroundColor: '#ffffff',
-        pixelRatio: 2,
-        cacheBust: true,
-      });
-
-      const link = document.createElement('a');
-      link.download = `${chartName.replace(/\s+/g, '_')}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Export failed. Please try again.');
-    } finally {
-      setIsExporting(false);
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open modal if clicking on controls
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
     }
-  };
-
-  const handlePrintChart = () => {
-    if (!chartRef.current) return;
-    
-    const printWindow = window.open('', '_blank');
-    
-    if (printWindow) {
-      // Clone the chart content
-      const chartContent = chartRef.current.innerHTML;
-      
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${chartName}</title>
-            <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              body { 
-                padding: 40px;
-                font-family: system-ui, -apple-system, sans-serif;
-                background: white;
-              }
-              .chart-container {
-                max-width: 100%;
-                margin: 0 auto;
-              }
-              .chart-title {
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 20px;
-                text-align: center;
-              }
-              .chart-wrapper {
-                min-height: 400px;
-              }
-              svg { max-width: 100%; height: auto; }
-              @media print {
-                body { padding: 20px; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="chart-container">
-              <div class="chart-title">${chartName}</div>
-              <div class="chart-wrapper">${chartContent}</div>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
-    }
+    setIsModalOpen(true);
   };
 
   return (
-    <Card
-      className={cn(
-        'flex h-full flex-col overflow-hidden transition-shadow',
-        isDragging && 'shadow-lg ring-2 ring-blue-500',
-        className
-      )}
-    >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
+    <>
+      <Card
+        className={cn(
+          'flex h-full flex-col overflow-hidden transition-all cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-blue-500/50',
+          isDragging && 'shadow-lg ring-2 ring-blue-500',
+          className
+        )}
+        onClick={handleCardClick}
+      >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-2">
+            {showControls && (
+              <GripVertical className="h-4 w-4 cursor-grab text-neutral-400 active:cursor-grabbing no-print" />
+            )}
+            <CardTitle className="text-sm font-medium">
+              {config.title || 'Untitled Chart'}
+            </CardTitle>
+          </div>
           {showControls && (
-            <GripVertical className="h-4 w-4 cursor-grab text-neutral-400 active:cursor-grabbing no-print" />
-          )}
-          <CardTitle className="text-sm font-medium">
-            {config.title || 'Untitled Chart'}
-          </CardTitle>
-        </div>
-        {showControls && (
-          <div className="flex items-center gap-1 no-print">
-            {/* Export dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={isExporting}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handlePrintChart}>
-                  <Printer className="mr-2 h-4 w-4" />
-                  Print Chart
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportPNG}>
-                  <FileImage className="mr-2 h-4 w-4" />
-                  Export as PNG
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* Remove button */}
-            {onRemove && (
+            <div className="flex items-center gap-1 no-print">
+              {/* Expand button */}
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onRemove}
-                className="h-7 w-7 text-neutral-500 hover:text-red-500"
+                className="h-7 w-7"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsModalOpen(true);
+                }}
+                title="View fullscreen"
               >
-                <X className="h-4 w-4" />
+                <Maximize2 className="h-4 w-4" />
               </Button>
-            )}
+              
+              {/* Remove button */}
+              {onRemove && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove();
+                  }}
+                  className="h-7 w-7 text-neutral-500 hover:text-red-500"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
+        </CardHeader>
+        <CardContent className="flex-1 p-4 pt-0">
+          <div className="h-full min-h-[200px] pointer-events-none">
+            <ChartRenderer
+              chartType={config.type}
+              data={data}
+              mapping={mapping}
+              showLegend={config.showLegend}
+              showGrid={config.showGrid}
+            />
           </div>
-        )}
-      </CardHeader>
-      <CardContent className="flex-1 p-4 pt-0">
-        <div ref={chartRef} className="h-full min-h-[200px]">
-          <ChartRenderer
-            chartType={config.type}
-            data={data}
-            mapping={mapping}
-            showLegend={config.showLegend}
-            showGrid={config.showGrid}
-          />
+        </CardContent>
+        
+        {/* Click hint */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/5 dark:hover:bg-white/5 transition-colors opacity-0 hover:opacity-100 pointer-events-none">
+          <span className="bg-black/70 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <Maximize2 className="h-3 w-3" />
+            Click to expand
+          </span>
         </div>
-      </CardContent>
-    </Card>
+      </Card>
+
+      {/* Fullscreen Modal */}
+      <ChartModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        config={config}
+        data={data}
+        onEdit={onEdit}
+      />
+    </>
   );
 }

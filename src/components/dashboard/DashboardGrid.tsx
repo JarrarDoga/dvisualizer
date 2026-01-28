@@ -10,6 +10,7 @@ interface DashboardGridProps {
   layout: LayoutItem[];
   onLayoutChange: (layout: LayoutItem[]) => void;
   onRemoveChart: (chartId: string) => void;
+  onEditChart?: (chartId: string) => void;
   className?: string;
   editable?: boolean;
 }
@@ -19,6 +20,7 @@ export function DashboardGrid({
   layout,
   onLayoutChange,
   onRemoveChart,
+  onEditChart,
   className,
   editable = true,
 }: DashboardGridProps) {
@@ -111,6 +113,7 @@ export function DashboardGrid({
             config={chart.config}
             data={chart.data}
             onRemove={editable ? () => onRemoveChart(chart.id) : undefined}
+            onEdit={editable && onEditChart ? () => onEditChart(chart.id) : undefined}
             showControls={editable}
             isDragging={draggedId === chart.id}
           />

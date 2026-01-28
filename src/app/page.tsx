@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import {
   BarChart3,
   Upload,
@@ -63,9 +66,15 @@ const supportedFormats = [
 ];
 
 export default function HomePage() {
+  const { data: session } = useSession();
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' });
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Header user={session?.user} onSignOut={handleSignOut} />
 
       <main className="flex-1">
         {/* Hero Section */}
