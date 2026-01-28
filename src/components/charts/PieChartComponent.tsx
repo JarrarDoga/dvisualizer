@@ -57,18 +57,26 @@ export function PieChartComponent({
               innerRadius, 
               outerRadius, 
               percent 
+            }: {
+              cx?: number;
+              cy?: number;
+              midAngle?: number;
+              innerRadius?: number;
+              outerRadius?: number;
+              percent?: number;
             }) => {
               const RADIAN = Math.PI / 180;
-              const radius = Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 1.4;
-              const x = Number(cx) + radius * Math.cos(-midAngle * RADIAN);
-              const y = Number(cy) + radius * Math.sin(-midAngle * RADIAN);
+              const angle = midAngle ?? 0;
+              const radius = Number(innerRadius ?? 0) + (Number(outerRadius ?? 0) - Number(innerRadius ?? 0)) * 1.4;
+              const x = Number(cx ?? 0) + radius * Math.cos(-angle * RADIAN);
+              const y = Number(cy ?? 0) + radius * Math.sin(-angle * RADIAN);
 
               return (
                 <text
                   x={x}
                   y={y}
                   fill="#374151"
-                  textAnchor={x > Number(cx) ? 'start' : 'end'}
+                  textAnchor={x > Number(cx ?? 0) ? 'start' : 'end'}
                   dominantBaseline="central"
                   style={{ 
                     fontSize: '12px', 
@@ -76,7 +84,7 @@ export function PieChartComponent({
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                   }}
                 >
-                  {`${((percent || 0) * 100).toFixed(0)}%`}
+                  {`${((percent ?? 0) * 100).toFixed(0)}%`}
                 </text>
               );
             } : false}
