@@ -44,6 +44,8 @@ export function ChartBuilder({ data, onAddChart, className }: ChartBuilderProps)
       nameKey: mapping.category,
       aggregation: mapping.aggregation,
       showTrendLine: mapping.showTrendLine,
+      scatterColorMode: mapping.scatterColorMode,
+      scatterPointColor: mapping.scatterPointColor,
     };
 
     onAddChart(config, data.rows);

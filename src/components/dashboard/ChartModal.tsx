@@ -47,6 +47,8 @@ export function ChartModal({
     value: config.dataKey,
     aggregation: config.aggregation,
     showTrendLine: config.showTrendLine,
+    scatterColorMode: config.scatterColorMode,
+    scatterPointColor: config.scatterPointColor,
   }), [config]);
 
   const chartName = config.title || 'chart';

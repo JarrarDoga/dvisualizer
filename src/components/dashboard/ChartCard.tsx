@@ -39,6 +39,8 @@ export function ChartCard({
     value: config.dataKey,
     aggregation: config.aggregation,
     showTrendLine: config.showTrendLine,
+    scatterColorMode: config.scatterColorMode,
+    scatterPointColor: config.scatterPointColor,
   }), [config]);
 
   const handleCardClick = (e: React.MouseEvent) => {
