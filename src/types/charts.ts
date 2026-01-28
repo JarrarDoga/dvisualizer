@@ -30,6 +30,7 @@ export interface ChartConfig {
   stacked?: boolean;
   layout?: 'horizontal' | 'vertical';
   aggregation?: AggregationType;
+  showTrendLine?: boolean;
 }
 
 export interface AxisConfig {

@@ -38,6 +38,7 @@ export function ChartCard({
     category: config.nameKey,
     value: config.dataKey,
     aggregation: config.aggregation,
+    showTrendLine: config.showTrendLine,
   }), [config]);
 
   const handleCardClick = (e: React.MouseEvent) => {

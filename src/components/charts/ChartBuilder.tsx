@@ -43,6 +43,7 @@ export function ChartBuilder({ data, onAddChart, className }: ChartBuilderProps)
       dataKey: mapping.value,
       nameKey: mapping.category,
       aggregation: mapping.aggregation,
+      showTrendLine: mapping.showTrendLine,
     };
 
     onAddChart(config, data.rows);

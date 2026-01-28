@@ -118,6 +118,7 @@ export function ChartRenderer({
           yAxisKey={mapping.yAxis || ''}
           categoryKey={mapping.category}
           showGrid={showGrid}
+          showTrendLine={mapping.showTrendLine}
         />
       );
 
