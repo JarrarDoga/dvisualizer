@@ -46,6 +46,7 @@ export function ChartModal({
     category: config.nameKey,
     value: config.dataKey,
     aggregation: config.aggregation,
+    showTrendLine: config.showTrendLine,
   }), [config]);
 
   const chartName = config.title || 'chart';

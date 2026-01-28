@@ -30,6 +30,7 @@ export interface ColumnMapping {
   series?: string[];
   label?: string;
   aggregation?: AggregationType;
+  showTrendLine?: boolean;
 }
 
 const NONE_VALUE = '__none__';
@@ -89,6 +90,7 @@ export function ColumnMapper({
 }: ColumnMapperProps) {
   const [mapping, setMapping] = React.useState<ColumnMapping>({});
   const [aggregation, setAggregation] = React.useState<AggregationType>('sum');
+  const [showTrendLine, setShowTrendLine] = React.useState(false);
   const onMappingChangeRef = React.useRef(onMappingChange);
   const hasInitialized = React.useRef(false);
 
@@ -126,20 +128,35 @@ export function ColumnMapper({
   React.useEffect(() => {
     const autoMapping: ColumnMapping = {};
 
-    // For X-axis, prefer categorical columns
+    // For X-axis, prefer categorical columns (but for scatter, prefer numeric)
     if (requirements.required.includes('xAxis') || requirements.optional.includes('xAxis')) {
-      autoMapping.xAxis = categoricalColumns[0] || headers[0];
+      if (chartType === 'scatter') {
+        // Scatter charts need numeric X-axis
+        autoMapping.xAxis = numericColumns[0] || headers[0];
+      } else {
+        autoMapping.xAxis = categoricalColumns[0] || headers[0];
+      }
     }
 
     // For Y-axis, prefer numeric columns
     if (requirements.required.includes('yAxis') || requirements.optional.includes('yAxis')) {
-      autoMapping.yAxis = numericColumns[0] || headers[1] || headers[0];
+      // For scatter, pick a different numeric column than X
+      if (chartType === 'scatter' && numericColumns.length > 1) {
+        autoMapping.yAxis = numericColumns[1];
+      } else {
+        autoMapping.yAxis = numericColumns[0] || headers[1] || headers[0];
+      }
     }
 
     // For category, prefer categorical columns
-    if (requirements.required.includes('category') || requirements.optional.includes('category')) {
+    // BUT for scatter charts, don't auto-select (leave it as None)
+    if (requirements.required.includes('category')) {
+      autoMapping.category = categoricalColumns[0] || headers[0];
+    } else if (requirements.optional.includes('category') && chartType !== 'scatter') {
+      // Only auto-select for non-scatter charts if optional
       autoMapping.category = categoricalColumns[0] || headers[0];
     }
+    // For scatter charts, category is intentionally left undefined (None)
 
     // For value, prefer numeric columns
     if (requirements.required.includes('value') || requirements.optional.includes('value')) {
@@ -148,6 +165,11 @@ export function ColumnMapper({
 
     // Include current aggregation setting
     autoMapping.aggregation = aggregation;
+    
+    // Include trend line setting for scatter charts
+    if (chartType === 'scatter') {
+      autoMapping.showTrendLine = showTrendLine;
+    }
 
     setMapping(autoMapping);
     
@@ -157,7 +179,7 @@ export function ColumnMapper({
     }, 0);
     
     hasInitialized.current = true;
-  }, [chartType, headers, numericColumns, categoricalColumns, requirements, aggregation]);
+  }, [chartType, headers, numericColumns, categoricalColumns, requirements, aggregation, showTrendLine]);
 
   const handleChange = (field: string, value: string) => {
     const actualValue = value === NONE_VALUE ? undefined : value;
@@ -169,6 +191,13 @@ export function ColumnMapper({
   const handleAggregationChange = (value: AggregationType) => {
     setAggregation(value);
     const newMapping = { ...mapping, aggregation: value };
+    setMapping(newMapping);
+    onMappingChangeRef.current(newMapping);
+  };
+
+  const handleTrendLineToggle = (checked: boolean) => {
+    setShowTrendLine(checked);
+    const newMapping = { ...mapping, showTrendLine: checked };
     setMapping(newMapping);
     onMappingChangeRef.current(newMapping);
   };
@@ -260,12 +289,55 @@ export function ColumnMapper({
     );
   };
 
+  const renderScatterOptions = () => {
+    if (chartType !== 'scatter') return null;
+
+    return (
+      <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
+        <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+          Scatter Plot Options
+        </h4>
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="trendLine" className="text-sm font-medium">
+              Show Trend Line
+            </Label>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Display a line of best fit through the data points
+            </p>
+          </div>
+          <button
+            id="trendLine"
+            type="button"
+            role="switch"
+            aria-checked={showTrendLine}
+            onClick={() => handleTrendLineToggle(!showTrendLine)}
+            className={cn(
+              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+              showTrendLine ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
+            )}
+          >
+            <span
+              className={cn(
+                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                showTrendLine ? 'translate-x-5' : 'translate-x-0'
+              )}
+            />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={cn('space-y-4', className)}>
       <div className="grid gap-4 sm:grid-cols-2">
         {requirements.required.map((field) => renderField(field, true))}
         {requirements.optional.map((field) => renderField(field, false))}
       </div>
+      
+      {/* Scatter Plot Options */}
+      {renderScatterOptions()}
       
       {/* Aggregation Selector */}
       <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
