@@ -8,6 +8,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  type PieLabelRenderProps,
 } from 'recharts';
 import { CHART_COLORS } from '@/types';
 
@@ -23,42 +24,36 @@ interface PieChartComponentProps {
 }
 
 // Custom render function for percentage labels that works better with export
-const renderCustomizedLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-}) => {
+const renderCustomizedLabel = (props: PieLabelRenderProps): React.ReactElement | null => {
+  const { cx, cy, midAngle, outerRadius, percent } = props;
+  
+  const cxNum = Number(cx ?? 0);
+  const cyNum = Number(cy ?? 0);
+  const angleNum = Number(midAngle ?? 0);
+  const outerRadiusNum = Number(outerRadius ?? 0);
+  const percentNum = Number(percent ?? 0);
+  
   const RADIAN = Math.PI / 180;
   // Position label outside the pie
-  const radius = outerRadius * 1.2;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const radius = outerRadiusNum * 1.2;
+  const x = cxNum + radius * Math.cos(-angleNum * RADIAN);
+  const y = cyNum + radius * Math.sin(-angleNum * RADIAN);
 
   // Only show label if percent is significant (> 3%)
-  if (percent < 0.03) return null;
+  if (percentNum < 0.03) return null;
 
   return (
     <text
       x={x}
       y={y}
       fill="#1f2937"
-      textAnchor={x > cx ? 'start' : 'end'}
+      textAnchor={x > cxNum ? 'start' : 'end'}
       dominantBaseline="central"
       fontSize={14}
       fontWeight={600}
       fontFamily="Arial, sans-serif"
     >
-      {`${(percent * 100).toFixed(0)}%`}
+      {`${(percentNum * 100).toFixed(0)}%`}
     </text>
   );
 };
@@ -104,8 +99,8 @@ export function PieChartComponent({
             innerRadius={innerRadius}
             outerRadius="65%"
             paddingAngle={2}
-            label={showLabels ? renderCustomizedLabel : false}
-            labelLine={showLabels ? { stroke: '#9ca3af', strokeWidth: 1 } : false}
+            label={showLabels ? renderCustomizedLabel : undefined}
+            labelLine={showLabels}
           >
             {data.map((_, index) => (
               <Cell
