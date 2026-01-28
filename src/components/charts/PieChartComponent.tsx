@@ -118,7 +118,7 @@ export function PieChartComponent({
               borderRadius: '6px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             }}
-            formatter={(value: number) => [value.toLocaleString(), 'Value']}
+            formatter={(value) => [String(value ?? 0).replace(/\B(?=(\d{3})+(?!\d))/g, ','), 'Value']}
           />
           {showLegend && (
             <Legend
