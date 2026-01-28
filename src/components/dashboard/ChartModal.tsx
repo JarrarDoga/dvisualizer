@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Download, Printer, FileImage, Edit } from 'lucide-react';
-import { toPng, toJpeg } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,7 +22,7 @@ import type { ChartConfig } from '@/types';
 import type { ColumnMapping } from '@/components/data/ColumnMapper';
 
 // Helper to wait for chart to fully render (including labels)
-const waitForChartRender = () => new Promise(resolve => setTimeout(resolve, 800));
+const waitForChartRender = () => new Promise(resolve => setTimeout(resolve, 500));
 
 interface ChartModalProps {
   isOpen: boolean;
@@ -62,18 +62,14 @@ export function ChartModal({
       // Wait for chart to fully render including all labels
       await waitForChartRender();
       
-      const dataUrl = await toPng(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        cacheBust: true,
-        includeQueryParams: true,
-        skipFonts: false,
-        style: {
-          // Ensure all text is visible
-          opacity: '1',
-        },
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
 
+      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `${sanitizedName}.png`;
       link.href = dataUrl;
@@ -96,15 +92,14 @@ export function ChartModal({
       // Wait for chart to fully render including all labels
       await waitForChartRender();
       
-      const dataUrl = await toJpeg(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        quality: 0.95,
-        cacheBust: true,
-        includeQueryParams: true,
-        skipFonts: false,
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
 
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
       link.download = `${sanitizedName}.jpg`;
       link.href = dataUrl;
@@ -127,13 +122,14 @@ export function ChartModal({
       // Wait for chart to fully render including all labels
       await waitForChartRender();
       
-      const dataUrl = await toPng(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        cacheBust: true,
-        includeQueryParams: true,
-        skipFonts: false,
+        scale: 3,
+        useCORS: true,
+        logging: false,
       });
+
+      const dataUrl = canvas.toDataURL('image/png');
 
       // Create a print window with the image for PDF
       const printWindow = window.open('', '_blank');
