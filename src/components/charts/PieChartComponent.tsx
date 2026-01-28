@@ -22,6 +22,47 @@ interface PieChartComponentProps {
   colors?: string[];
 }
 
+// Custom render function for percentage labels that works better with export
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+}) => {
+  const RADIAN = Math.PI / 180;
+  // Position label outside the pie
+  const radius = outerRadius * 1.2;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  // Only show label if percent is significant (> 3%)
+  if (percent < 0.03) return null;
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="#1f2937"
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      fontSize={14}
+      fontWeight={600}
+      fontFamily="Arial, sans-serif"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
 export function PieChartComponent({
   data,
   nameKey,
@@ -32,6 +73,19 @@ export function PieChartComponent({
   innerRadius = 0,
   colors = [...CHART_COLORS],
 }: PieChartComponentProps) {
+  // Calculate total for percentage
+  const total = React.useMemo(() => {
+    return data.reduce((sum, item) => sum + (Number(item[valueKey]) || 0), 0);
+  }, [data, valueKey]);
+
+  // Prepare data with percentage
+  const dataWithPercent = React.useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      percent: total > 0 ? (Number(item[valueKey]) || 0) / total : 0,
+    }));
+  }, [data, valueKey, total]);
+
   return (
     <div className="h-full w-full">
       {title && (
@@ -42,56 +96,16 @@ export function PieChartComponent({
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={data}
+            data={dataWithPercent}
             dataKey={valueKey}
             nameKey={nameKey}
             cx="50%"
             cy="50%"
             innerRadius={innerRadius}
-            outerRadius="70%"
+            outerRadius="65%"
             paddingAngle={2}
-            label={showLabels ? ({ 
-              cx, 
-              cy, 
-              midAngle, 
-              innerRadius, 
-              outerRadius, 
-              percent 
-            }: {
-              cx?: number;
-              cy?: number;
-              midAngle?: number;
-              innerRadius?: number;
-              outerRadius?: number;
-              percent?: number;
-            }) => {
-              const RADIAN = Math.PI / 180;
-              const angle = midAngle ?? 0;
-              const radius = Number(innerRadius ?? 0) + (Number(outerRadius ?? 0) - Number(innerRadius ?? 0)) * 1.4;
-              const x = Number(cx ?? 0) + radius * Math.cos(-angle * RADIAN);
-              const y = Number(cy ?? 0) + radius * Math.sin(-angle * RADIAN);
-
-              return (
-                <text
-                  x={x}
-                  y={y}
-                  fill="#374151"
-                  textAnchor={x > Number(cx ?? 0) ? 'start' : 'end'}
-                  dominantBaseline="central"
-                  style={{ 
-                    fontSize: '12px', 
-                    fontWeight: 500,
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                  }}
-                >
-                  {`${((percent ?? 0) * 100).toFixed(0)}%`}
-                </text>
-              );
-            } : false}
-            labelLine={showLabels ? {
-              stroke: '#9ca3af',
-              strokeWidth: 1,
-            } : false}
+            label={showLabels ? renderCustomizedLabel : false}
+            labelLine={showLabels ? { stroke: '#9ca3af', strokeWidth: 1 } : false}
           >
             {data.map((_, index) => (
               <Cell
@@ -109,6 +123,7 @@ export function PieChartComponent({
               borderRadius: '6px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             }}
+            formatter={(value: number) => [value.toLocaleString(), 'Value']}
           />
           {showLegend && (
             <Legend
@@ -116,6 +131,11 @@ export function PieChartComponent({
               verticalAlign="bottom"
               align="center"
               iconType="circle"
+              formatter={(value: string, entry) => {
+                const item = dataWithPercent.find(d => d[nameKey] === value);
+                const pct = item ? `${(item.percent * 100).toFixed(0)}%` : '';
+                return `${value} (${pct})`;
+              }}
             />
           )}
         </PieChart>
