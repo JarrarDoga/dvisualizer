@@ -68,18 +68,17 @@ export function PieChartComponent({
   innerRadius = 0,
   colors = [...CHART_COLORS],
 }: PieChartComponentProps) {
-  // Calculate total for percentage
-  const total = React.useMemo(() => {
-    return data.reduce((sum, item) => sum + (Number(item[valueKey]) || 0), 0);
-  }, [data, valueKey]);
-
-  // Prepare data with percentage
-  const dataWithPercent = React.useMemo(() => {
-    return data.map(item => ({
-      ...item,
-      percent: total > 0 ? (Number(item[valueKey]) || 0) / total : 0,
-    }));
-  }, [data, valueKey, total]);
+  // Calculate total and percentages for legend
+  const { total, percentMap } = React.useMemo(() => {
+    const t = data.reduce((sum, item) => sum + (Number(item[valueKey]) || 0), 0);
+    const pMap = new Map<string, number>();
+    data.forEach(item => {
+      const name = String(item[nameKey] ?? '');
+      const pct = t > 0 ? (Number(item[valueKey]) || 0) / t : 0;
+      pMap.set(name, pct);
+    });
+    return { total: t, percentMap: pMap };
+  }, [data, nameKey, valueKey]);
 
   return (
     <div className="h-full w-full">
@@ -91,7 +90,7 @@ export function PieChartComponent({
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={dataWithPercent}
+            data={data}
             dataKey={valueKey}
             nameKey={nameKey}
             cx="50%"
@@ -118,7 +117,6 @@ export function PieChartComponent({
               borderRadius: '6px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             }}
-            formatter={(value) => [String(value ?? 0).replace(/\B(?=(\d{3})+(?!\d))/g, ','), 'Value']}
           />
           {showLegend && (
             <Legend
@@ -126,10 +124,10 @@ export function PieChartComponent({
               verticalAlign="bottom"
               align="center"
               iconType="circle"
-              formatter={(value: string, entry) => {
-                const item = dataWithPercent.find(d => d[nameKey] === value);
-                const pct = item ? `${(item.percent * 100).toFixed(0)}%` : '';
-                return `${value} (${pct})`;
+              formatter={(value: string) => {
+                const pct = percentMap.get(value);
+                const pctStr = pct !== undefined ? `${(pct * 100).toFixed(0)}%` : '';
+                return `${value} (${pctStr})`;
               }}
             />
           )}
